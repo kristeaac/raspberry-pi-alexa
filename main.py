@@ -1,23 +1,37 @@
 import RPi.GPIO as GPIO
 import time
+import os
+import requests
 
-ledPin = 8
+refreshToken = os.environ['ALEXA_REFRESH_TOKEN']
+
+internetConnectionPin = 8
 buttonPin = 10
 
 GPIO.setmode(GPIO.BOARD)
-GPIO.setup(ledPin, GPIO.OUT)
+GPIO.setup(internetConnectionPin, GPIO.OUT)
 GPIO.setup(buttonPin, GPIO.IN)
 
-blink=0
-while blink < 100:
-    val = GPIO.input(buttonPin)
-    if val:
-        GPIO.output(ledPin, True)
-        time.sleep(.5)
-        GPIO.output(ledPin, False)
-        time.sleep(.5)
-        blink += 1
-    else:
-        GPIO.output(ledPin, True)
+def cleanup():
+    GPIO.cleanup()
 
-GPIO.cleanup()
+def ledOn(pin):
+    GPIO.output(pin, True)
+
+def internet_on():
+    print "Checking Internet Connection"
+    try:
+        requests.get('https://api.amazon.com/auth/o2/token')
+        print "Connection OK"
+        return True
+    except:
+        print "Connection Failed"
+        return False
+
+try:
+    if internet_on():
+        ledOn(internetConnectionPin)
+except:
+    cleanup()
+
+cleanup()
