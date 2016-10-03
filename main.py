@@ -17,17 +17,65 @@ servers = ["127.0.0.1:11211"]
 mc = Client(servers, debug=1)
 device = "plughw:1"  # Name of your microphone/soundcard in arecord -L
 
-red = 33
-green = 35
-blue = 37
-led_pins = [red, green, blue]
 push_button = 10
 
+class RGBLed:
+
+    def __init_(self, red, green, blue):
+        self.pins = [red, green, blue]
+        self.red = [red]
+        self.green = [green]
+        self.blue = [blue]
+        self.cyan = [green, blue]
+        self.magenta = [red, blue]
+        self.yellow = [red, green]
+        self.white = [red, green, blue]
+
+    def setup(self):
+        for pin in self.pins:
+            GPIO.setup(pin, GPIO.OUT)
+
+    def on(self, color):
+        for pin in color:
+            GPIO.output(pin, True)
+
+    def off(self):
+        for pin in self.pins:
+            GPIO.output(pin, False)
+
+    def blink(self, color, duration=.5):
+        self.on(color)
+        time.sleep(duration)
+        self.off()
+
+rgbLed = RGBLed(33, 35, 37)
+
+# AVS
+url = 'https://access-alexa-na.amazon.com/v1/avs/speechrecognizer/recognize'
+request_data = {
+    "messageHeader": {
+        "deviceContext": [
+            {
+                "name": "playbackState",
+                "namespace": "AudioPlayer",
+                "payload": {
+                    "streamId": "",
+                    "offsetInMilliseconds": "0",
+                    "playerActivity": "IDLE"
+                }
+            }
+        ]
+    },
+    "messageBody": {
+        "profile": "alexa-close-talk",
+        "locale": "en-us",
+        "format": "audio/L16; rate=16000; channels=1"
+    }
+}
 
 def setup():
     GPIO.setmode(GPIO.BOARD)
-    for pin in led_pins:
-        GPIO.setup(pin, GPIO.OUT)
+    rgbLed.setup()
     GPIO.setup(push_button, GPIO.IN)
 
 
@@ -38,20 +86,6 @@ def greeting():
 def cleanup():
     GPIO.cleanup()
     exit()
-
-
-def blink(pin, duration=3):
-    GPIO.output(pin, True)
-    time.sleep(duration)
-    GPIO.output(pin, False)
-
-
-def led_on(pin):
-    GPIO.output(pin, True)
-
-
-def led_off(pin):
-    GPIO.output(pin, False)
 
 
 def internet_on():
@@ -88,40 +122,23 @@ def pressed():
 
 def alexa():
     #GPIO.output(24, GPIO.HIGH)
-    url = 'https://access-alexa-na.amazon.com/v1/avs/speechrecognizer/recognize'
+    global url
+    global request_data
+
     headers = {'Authorization': 'Bearer %s' % get_access_token()}
-    d = {
-        "messageHeader": {
-            "deviceContext": [
-                {
-                    "name": "playbackState",
-                    "namespace": "AudioPlayer",
-                    "payload": {
-                        "streamId": "",
-                        "offsetInMilliseconds": "0",
-                        "playerActivity": "IDLE"
-                    }
-                }
-            ]
-        },
-        "messageBody": {
-            "profile": "alexa-close-talk",
-            "locale": "en-us",
-            "format": "audio/L16; rate=16000; channels=1"
-        }
-    }
+
     with open(path + 'recording.wav') as inf:
         files = [
-            ('file', ('request', json.dumps(d), 'application/json; charset=UTF-8')),
+            ('file', ('request', json.dumps(request_data), 'application/json; charset=UTF-8')),
             ('file', ('audio', inf, 'audio/L16; rate=16000; channels=1'))
         ]
-        r = requests.post(url, headers=headers, files=files)
-    if r.status_code == 200:
-        for v in r.headers['content-type'].split(";"):
+        response = requests.post(url, headers=headers, files=files)
+    if response.status_code == 200:
+        for v in response.headers['content-type'].split(";"):
             if re.match('.*boundary.*', v):
                 boundary = v.split("=")[1]
-        data = r.content.split(boundary)
-        for d in data:
+        response_ata = response.content.split(boundary)
+        for d in response_ata:
             if (len(d) >= 1024):
                 audio = d.split('\r\n\r\n')[1].rstrip('--')
         with open(path + "response.mp3", 'wb') as f:
@@ -156,7 +173,7 @@ def listen():
                 l, data = inp.read()
                 if l:
                     audio += data
-                led_on(green)
+                rgbLed.on(rgbLed.green)
                 print('recording started')
                 recording = True
         elif recording:
@@ -164,7 +181,7 @@ def listen():
             rf.write(audio)
             rf.close()
             inp = None
-            led_off(green)
+            rgbLed.off()
             print('recording stopped')
             recording = False
             alexa()
@@ -176,14 +193,14 @@ if __name__ == "__main__":
         # check internet connection
         if internet_on():
             # TODO would be nice to fade this blue in and out
-            led_on(blue)
+            rgbLed.on(rgbLed.blue)
             greeting()
-            led_off(blue)
+            rgbLed.off()
         else:
-            blink(red)
+            rgbLed.blink(rgbLed.red)
             cleanup()
 
-        access_token = get_access_token()
+        get_access_token()
 
         listen()
 
