@@ -81,6 +81,19 @@ def get_access_token():
 def pressed():
     return not GPIO.input(push_button)
 
+def listen():
+    recording = False
+    while True:
+        if pressed():
+            if not recording:
+                led_on(green)
+                recording = True
+                print('start recording')
+        else:
+            if recording:
+                led_off(green)
+                recording = False
+                print('stop recording')
 
 if __name__ == "__main__":
     setup()
@@ -97,12 +110,8 @@ if __name__ == "__main__":
 
         access_token = get_access_token()
 
-        # wait for push button to be pressed
-        while True:
-            if pressed():
-                led_on(green)
-            else:
-                led_off(green)
+        listen()
+
     except:
         cleanup()
     cleanup()
