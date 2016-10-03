@@ -179,14 +179,11 @@ def listen():
             rgbLed.off()
             print('recording stopped')
             recording = False
-            alexa_thread = threading.Thread(target=alexa(), args=[])
-            started = False
-            while not started or alexa_thread.isAlive():
+            alexa_thread = None
+            while not alexa_thread or alexa_thread.isAlive():
                 rgbLed.blink(rgbLed.yellow)
-                if not started:
-                    alexa_thread.start()
-                    started = True
-
+                if not alexa_thread:
+                    alexa_thread = threading.Thread(target=alexa(), args=[])
 
 if __name__ == "__main__":
     setup()
