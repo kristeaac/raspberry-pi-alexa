@@ -122,7 +122,7 @@ def pressed():
 
 
 def alexa():
-    #GPIO.output(24, GPIO.HIGH)
+    rgbLed.on(rgbLed.yellow)
     global url
     global request_data
 
@@ -144,16 +144,8 @@ def alexa():
                 audio = d.split('\r\n\r\n')[1].rstrip('--')
         with open(path + "response.mp3", 'wb') as f:
             f.write(audio)
-        # GPIO.output(25, GPIO.LOW)
+        rgbLed.off()
         os.system('mpg123 -q {}1sec.mp3 {}response.mp3'.format(path, path))
-        #GPIO.output(24, GPIO.LOW)
-        # else:
-        #     GPIO.output(lights, GPIO.LOW)
-        #     for x in range(0, 3):
-        #         time.sleep(.2)
-        #         GPIO.output(25, GPIO.HIGH)
-        #         time.sleep(.2)
-        #         GPIO.output(lights, GPIO.LOW)
 
 
 def listen():
