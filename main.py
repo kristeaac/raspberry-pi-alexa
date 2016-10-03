@@ -170,7 +170,7 @@ def alexa():
 
     headers = {'Authorization': 'Bearer %s' % get_access_token()}
 
-    with open(PATH + RECORDING_WAV) as inf:
+    with open(RECORDING_WAV) as inf:
         files = [
             ('file', ('request', json.dumps(request_data), 'application/json; charset=UTF-8')),
             ('file', ('audio', inf, 'audio/L16; rate=16000; channels=1'))
@@ -237,8 +237,5 @@ if __name__ == "__main__":
             listen()
         else:
             rgbLed.blink(rgbLed.red)
-    except Exception as error:
-        print(error)
-        raise error
     finally:
         cleanup()
