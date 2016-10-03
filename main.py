@@ -155,7 +155,9 @@ def alexa():
         with open(path + "response.mp3", 'wb') as f:
             f.write(audio)
         lock.release()
+        rgbLed.on(rgbLed.yellow)
         os.system('mpg123 -q {}1sec.mp3 {}response.mp3'.format(path, path))
+        rgbLed.off()
 
 
 def listen():
