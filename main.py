@@ -17,8 +17,10 @@ GPIO.setup(push_button, GPIO.IN)
 def cleanup():
     GPIO.cleanup()
 
-def led_on(pin):
+def blink(pin, duration=3):
     GPIO.output(pin, True)
+    time.sleep(duration)
+    GPIO.output(pin, False)
 
 def internet_on():
     print "Checking Internet Connection"
@@ -32,7 +34,8 @@ def internet_on():
 
 try:
     if internet_on():
-        led_on(blue)
+        blink(blue)
+
 except:
     cleanup()
 
