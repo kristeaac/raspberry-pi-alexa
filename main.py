@@ -183,7 +183,8 @@ def listen():
             while not alexa_thread or alexa_thread.isAlive():
                 rgbLed.blink(rgbLed.yellow)
                 if not alexa_thread:
-                    alexa_thread = threading.Thread(target=alexa(), args=[])
+                    alexa_thread = threading.Thread(target=alexa, args=[])
+		    alexa_thread.start()
 
 if __name__ == "__main__":
     setup()
