@@ -2,9 +2,17 @@ import RPi.GPIO as GPIO
 import time
 import os
 import requests
+from memcache import Client
+import json
 
-refreshToken = os.environ['ALEXA_REFRESH_TOKEN']
+refresh_token = os.environ['ALEXA_REFRESH_TOKEN']
+client_id = os.environ['ALEXA_CLIENT_ID']
+client_secret = os.environ['ALEXA_CLIENT_SECRET']
+
 path = os.path.realpath(__file__).rstrip(os.path.basename(__file__))
+
+servers = ["127.0.0.1:11211"]
+mc = Client(servers, debug=1)
 
 red = 33
 green = 35
@@ -22,6 +30,7 @@ def setup():
 
 def greeting():
     os.system('mpg123 -q {}1sec.mp3 {}hello.mp3'.format(path, path))
+
 
 def cleanup():
     GPIO.cleanup()
@@ -53,6 +62,22 @@ def internet_on():
         return False
 
 
+def get_access_token():
+    token = mc.get("access_token")
+    global refresh_token
+    if token:
+        return token
+    elif refresh_token:
+        payload = {"client_id" : client_id, "client_secret" : client_secret, "refresh_token" : refresh_token, "grant_type" : "refresh_token", }
+        url = "https://api.amazon.com/auth/o2/token"
+        r = requests.post(url, data = payload)
+        resp = json.loads(r.text)
+        mc.set("access_token", resp['access_token'], 3570)
+        return resp['access_token']
+    else:
+        return False
+
+
 def pressed():
     return not GPIO.input(push_button)
 
@@ -63,11 +88,13 @@ if __name__ == "__main__":
         # check internet connection
         if internet_on():
             blink(blue)
+            greeting()
         else:
             blink(red)
             cleanup()
 
-        greeting()
+        access_token = get_access_token()
+        print('access token: '.format(access_token))
 
         # wait for push button to be pressed
         while True:
