@@ -24,8 +24,31 @@ RESPONSE_MP3 = PATH + 'response.mp3'
 
 PUSH_BUTTON = 10
 
-class RGBLed:
+# AVS
+AVS_URL = 'https://access-alexa-na.amazon.com/v1/avs/speechrecognizer/recognize'
+AVS_REQUEST_DATA = {
+    "messageHeader": {
+        "deviceContext": [
+            {
+                "name": "playbackState",
+                "namespace": "AudioPlayer",
+                "payload": {
+                    "streamId": "",
+                    "offsetInMilliseconds": "0",
+                    "playerActivity": "IDLE"
+                }
+            }
+        ]
+    },
+    "messageBody": {
+        "profile": "alexa-close-talk",
+        "locale": "en-us",
+        "format": "audio/L16; rate=16000; channels=1"
+    }
+}
 
+
+class RGBLed:
     def __init__(self, red, green, blue):
         self.pins = [red, green, blue]
         self.red = [red]
@@ -70,41 +93,22 @@ class RGBLed:
         finally:
             self.lock.release()
 
+
 rgbLed = RGBLed(33, 35, 37)
 
-# AVS
-url = 'https://access-alexa-na.amazon.com/v1/avs/speechrecognizer/recognize'
-request_data = {
-    "messageHeader": {
-        "deviceContext": [
-            {
-                "name": "playbackState",
-                "namespace": "AudioPlayer",
-                "payload": {
-                    "streamId": "",
-                    "offsetInMilliseconds": "0",
-                    "playerActivity": "IDLE"
-                }
-            }
-        ]
-    },
-    "messageBody": {
-        "profile": "alexa-close-talk",
-        "locale": "en-us",
-        "format": "audio/L16; rate=16000; channels=1"
-    }
-}
 
 def setup():
-    print("Setting Up GPIO")
+    print("Started GPIO Setup")
     GPIO.setwarnings(False)
     GPIO.setmode(GPIO.BOARD)
     rgbLed.setup()
     GPIO.setup(PUSH_BUTTON, GPIO.IN)
-    print("Completed GPIO Setup")
+    print("GPIO Setup Complete")
+
 
 def speak(utterance_file):
     os.system('mpg123 -q {}1sec.mp3 {}'.format(PATH, utterance_file))
+
 
 def greeting():
     global HELLO_MP3
@@ -112,12 +116,12 @@ def greeting():
 
 
 def cleanup():
-    print("Start Cleanup and Exit")
+    print("Started GPIO Cleanup")
     try:
         GPIO.cleanup()
         exit()
     finally:
-        print("Completed Cleanup and Exit. Goodbye.")
+        print("Cleanup Complete")
 
 
 def internet_on():
@@ -151,9 +155,11 @@ def get_access_token():
 def pressed():
     return not GPIO.input(PUSH_BUTTON)
 
+
 def thinking(lock):
     while lock.locked():
         rgbLed.blink(rgbLed.yellow)
+
 
 def alexa():
     print("Alexa is Thinking")
@@ -163,8 +169,8 @@ def alexa():
     thinking_thread = threading.Thread(target=thinking, args=(lock, ))
     thinking_thread.start()
 
-    global url
-    global request_data
+    global AVS_URL
+    global AVS_REQUEST_DATA
     global RECORDING_WAV
     global RESPONSE_MP3
 
@@ -172,10 +178,10 @@ def alexa():
 
     with open(RECORDING_WAV) as inf:
         files = [
-            ('file', ('request', json.dumps(request_data), 'application/json; charset=UTF-8')),
+            ('file', ('request', json.dumps(AVS_REQUEST_DATA), 'application/json; charset=UTF-8')),
             ('file', ('audio', inf, 'audio/L16; rate=16000; channels=1'))
         ]
-        response = requests.post(url, headers=headers, files=files)
+        response = requests.post(AVS_URL, headers=headers, files=files)
     if response.status_code == 200:
         for v in response.headers['content-type'].split(";"):
             if re.match('.*boundary.*', v):
@@ -186,9 +192,9 @@ def alexa():
                 audio = d.split('\r\n\r\n')[1].rstrip('--')
         with open(RESPONSE_MP3, 'wb') as f:
             f.write(audio)
-        lock.release() # stop blinking
+        lock.release()  # stop blinking
         print("Alexa is Ready to Speak")
-        rgbLed.on(rgbLed.yellow) # show solid yellow while speaking
+        rgbLed.on(rgbLed.yellow)  # show solid yellow while speaking
         speak(RESPONSE_MP3)
         rgbLed.off()
     print("Alexa has Handled the Request")
@@ -224,6 +230,7 @@ def listen():
             print('Recording Stopped')
             recording = False
             alexa()
+
 
 if __name__ == "__main__":
     setup()
