@@ -5,9 +5,9 @@ import requests
 
 refreshToken = os.environ['ALEXA_REFRESH_TOKEN']
 
-red = 8
-green = 24
-blue = 25
+red = 33
+green = 35
+blue = 37
 led_pins = [red, green, blue]
 push_button = 10
 
