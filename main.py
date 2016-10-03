@@ -36,14 +36,18 @@ def internet_on():
         return False
 
 def pressed():
-    return GPIO.input(push_button)
+    return GPIO.input(push_button) == False
 
 if __name__ == "__main__":
     setup()
+    cleaned = False
     try:
         # check internet connection
         if internet_on():
             blink(blue)
+        else:
+            blink(red)
+            exit()
 
         # wait for push button to be pressed
         while True:
@@ -51,4 +55,6 @@ if __name__ == "__main__":
                 blink(green)
     except:
         cleanup()
-    cleanup()
+        cleaned = True
+    if not cleaned:
+        cleanup()
