@@ -123,8 +123,17 @@ def get_access_token():
 def pressed():
     return not GPIO.input(push_button)
 
+def thinking(condition):
+    while True:
+        with condition:
+            condition.wait()
+            rgbLed.blink(rgbLed.yellow)
 
 def alexa():
+    condition = threading.Condition()
+    thinking_thread = threading.Thread(target=thinking, args=(condition, ))
+    thinking_thread.start()
+
     global url
     global request_data
 
@@ -146,7 +155,7 @@ def alexa():
                 audio = d.split('\r\n\r\n')[1].rstrip('--')
         with open(path + "response.mp3", 'wb') as f:
             f.write(audio)
-        rgbLed.off()
+        condition.notify()
         os.system('mpg123 -q {}1sec.mp3 {}response.mp3'.format(path, path))
 
 
@@ -179,12 +188,7 @@ def listen():
             rgbLed.off()
             print('recording stopped')
             recording = False
-            alexa_thread = None
-            while not alexa_thread or alexa_thread.isAlive():
-                rgbLed.blink(rgbLed.yellow)
-                if not alexa_thread:
-                    alexa_thread = threading.Thread(target=alexa, args=[])
-		    alexa_thread.start()
+            alexa()
 
 if __name__ == "__main__":
     setup()
