@@ -57,9 +57,11 @@ class RGBLed:
         self.lock.acquire()
         try:
             for i in range(count):
-                self.on(color)
+                for pin in color:
+                    GPIO.output(pin, True)
                 time.sleep(duration)
-                self.off()
+                for pin in self.pins:
+                    GPIO.output(pin, False)
                 time.sleep(duration)
         finally:
             self.lock.release()
