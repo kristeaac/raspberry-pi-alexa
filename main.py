@@ -96,10 +96,12 @@ request_data = {
 }
 
 def setup():
+    print("Setting Up GPIO")
     GPIO.setwarnings(False)
     GPIO.setmode(GPIO.BOARD)
     rgbLed.setup()
     GPIO.setup(PUSH_BUTTON, GPIO.IN)
+    print("Completed GPIO Setup")
 
 def speak(utterance_file):
     os.system('mpg123 -q {}1sec.mp3 {}'.format(PATH, utterance_file))
