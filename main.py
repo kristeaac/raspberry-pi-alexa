@@ -35,8 +35,20 @@ def internet_on():
         print "Connection Failed"
         return False
 
+def pressed():
+    return GPIO.input(push_button)
+
 if __name__ == "__main__":
     setup()
-    if internet_on():
-        blink(blue)
+    try:
+        # check internet connection
+        if internet_on():
+            blink(blue)
+
+        # wait for push button to be pressed
+        while True:
+            if pressed():
+                blink(green)
+    except:
+        cleanup()
     cleanup()
