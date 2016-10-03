@@ -8,11 +8,13 @@ refreshToken = os.environ['ALEXA_REFRESH_TOKEN']
 red = 8
 green = 24
 blue = 25
+led_pins = [red, green, blue]
 push_button = 10
 
 def setup():
     GPIO.setmode(GPIO.BOARD)
-    GPIO.setup(red, GPIO.OUT)
+    for pin in led_pins:
+        GPIO.setup(pin, GPIO.OUT)
     GPIO.setup(push_button, GPIO.IN)
 
 def cleanup():
