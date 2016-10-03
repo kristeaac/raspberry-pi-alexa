@@ -6,6 +6,7 @@ from memcache import Client
 import json
 import alsaaudio
 import re
+import threading
 
 refresh_token = os.environ['ALEXA_REFRESH_TOKEN']
 client_id = os.environ['ALEXA_CLIENT_ID']
@@ -124,7 +125,6 @@ def pressed():
 
 
 def alexa():
-    rgbLed.on(rgbLed.yellow)
     global url
     global request_data
 
@@ -142,7 +142,7 @@ def alexa():
                 boundary = v.split("=")[1]
         response_ata = response.content.split(boundary)
         for d in response_ata:
-            if (len(d) >= 1024):
+            if len(d) >= 1024:
                 audio = d.split('\r\n\r\n')[1].rstrip('--')
         with open(path + "response.mp3", 'wb') as f:
             f.write(audio)
@@ -179,7 +179,9 @@ def listen():
             rgbLed.off()
             print('recording stopped')
             recording = False
-            alexa()
+            alexa_thread = threading.Thread(target=alexa(), args=[])
+            while alexa_thread.is_alive():
+                rgbLed.blink(rgbLed.yellow)
 
 
 if __name__ == "__main__":
