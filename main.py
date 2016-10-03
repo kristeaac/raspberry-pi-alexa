@@ -8,17 +8,21 @@ import alsaaudio
 import re
 import threading
 
-refresh_token = os.environ['ALEXA_REFRESH_TOKEN']
-client_id = os.environ['ALEXA_CLIENT_ID']
-client_secret = os.environ['ALEXA_CLIENT_SECRET']
+REFRESH_TOKEN = os.environ['ALEXA_REFRESH_TOKEN']
+CLIENT_ID = os.environ['ALEXA_CLIENT_ID']
+CLIENT_SECRET = os.environ['ALEXA_CLIENT_SECRET']
 
-path = os.path.realpath(__file__).rstrip(os.path.basename(__file__))
+PATH = os.path.realpath(__file__).rstrip(os.path.basename(__file__))
 
-servers = ["127.0.0.1:11211"]
-mc = Client(servers, debug=1)
-device = "plughw:1"  # Name of your microphone/soundcard in arecord -L
+SERVERS = ["127.0.0.1:11211"]
+CACHE = Client(SERVERS, debug=1)
+DEVICE = "plughw:1"  # Name of your microphone/soundcard in arecord -L
 
-push_button = 10
+HELLO_MP3 = PATH + 'hello.mp3'
+RECORDING_WAV = PATH + 'recording.wav'
+RESPONSE_MP3 = PATH + 'response.mp3'
+
+PUSH_BUTTON = 10
 
 class RGBLed:
 
@@ -95,11 +99,14 @@ def setup():
     GPIO.setwarnings(False)
     GPIO.setmode(GPIO.BOARD)
     rgbLed.setup()
-    GPIO.setup(push_button, GPIO.IN)
+    GPIO.setup(PUSH_BUTTON, GPIO.IN)
 
+def speak(utterance_file):
+    os.system('mpg123 -q {}1sec.mp3 {}'.format(PATH, utterance_file))
 
 def greeting():
-    os.system('mpg123 -q {}1sec.mp3 {}hello.mp3'.format(path, path))
+    global HELLO_MP3
+    speak(HELLO_MP3)
 
 
 def cleanup():
@@ -119,30 +126,32 @@ def internet_on():
 
 
 def get_access_token():
-    token = mc.get("access_token")
-    global refresh_token
+    token = CACHE.get("access_token")
+    global REFRESH_TOKEN
     if token:
         return token
-    elif refresh_token:
-        payload = {"client_id": client_id, "client_secret": client_secret, "refresh_token": refresh_token,
+    elif REFRESH_TOKEN:
+        payload = {"client_id": CLIENT_ID, "client_secret": CLIENT_SECRET, "refresh_token": REFRESH_TOKEN,
                    "grant_type": "refresh_token", }
         url = "https://api.amazon.com/auth/o2/token"
         r = requests.post(url, data=payload)
         resp = json.loads(r.text)
-        mc.set("access_token", resp['access_token'], 3570)
+        CACHE.set("access_token", resp['access_token'], 3570)
         return resp['access_token']
     else:
         return False
 
 
 def pressed():
-    return not GPIO.input(push_button)
+    return not GPIO.input(PUSH_BUTTON)
 
 def thinking(lock):
     while lock.locked():
         rgbLed.blink(rgbLed.yellow)
 
 def alexa():
+    print("Alexa is Thinking")
+    # blink yellow while Alexa is thinking
     lock = threading.Lock()
     lock.acquire()
     thinking_thread = threading.Thread(target=thinking, args=(lock, ))
@@ -150,10 +159,12 @@ def alexa():
 
     global url
     global request_data
+    global RECORDING_WAV
+    global RESPONSE_MP3
 
     headers = {'Authorization': 'Bearer %s' % get_access_token()}
 
-    with open(path + 'recording.wav') as inf:
+    with open(PATH + RECORDING_WAV) as inf:
         files = [
             ('file', ('request', json.dumps(request_data), 'application/json; charset=UTF-8')),
             ('file', ('audio', inf, 'audio/L16; rate=16000; channels=1'))
@@ -167,12 +178,14 @@ def alexa():
         for d in response_ata:
             if len(d) >= 1024:
                 audio = d.split('\r\n\r\n')[1].rstrip('--')
-        with open(path + "response.mp3", 'wb') as f:
+        with open(RESPONSE_MP3, 'wb') as f:
             f.write(audio)
-        lock.release()
-        rgbLed.on(rgbLed.yellow)
-        os.system('mpg123 -q {}1sec.mp3 {}response.mp3'.format(path, path))
+        lock.release() # stop blinking
+        print("Alexa is Ready to Speak")
+        rgbLed.on(rgbLed.yellow) # show solid yellow while speaking
+        speak(RESPONSE_MP3)
         rgbLed.off()
+    print("Alexa has Handled the Request")
 
 
 def listen():
@@ -184,7 +197,7 @@ def listen():
                 if l:
                     audio += data
             else:
-                inp = alsaaudio.PCM(alsaaudio.PCM_CAPTURE, alsaaudio.PCM_NORMAL, device)
+                inp = alsaaudio.PCM(alsaaudio.PCM_CAPTURE, alsaaudio.PCM_NORMAL, DEVICE)
                 inp.setchannels(1)
                 inp.setrate(16000)
                 inp.setformat(alsaaudio.PCM_FORMAT_S16_LE)
@@ -194,22 +207,21 @@ def listen():
                 if l:
                     audio += data
                 rgbLed.on(rgbLed.green)
-                print('recording started')
+                print('Recording Started')
                 recording = True
         elif recording:
-            rf = open(path + 'recording.wav', 'w')
+            rf = open(RECORDING_WAV, 'w')
             rf.write(audio)
             rf.close()
             inp = None
             rgbLed.off()
-            print('recording stopped')
+            print('Recording Stopped')
             recording = False
             alexa()
 
 if __name__ == "__main__":
     setup()
     try:
-        # check internet connection
         if internet_on():
             # TODO would be nice to fade this blue in and out
             rgbLed.on(rgbLed.blue)
@@ -223,7 +235,5 @@ if __name__ == "__main__":
 
         listen()
 
-    except Exception:
+    finally:
         cleanup()
-        raise
-    cleanup()
