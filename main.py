@@ -87,7 +87,7 @@ def pressed():
 
 
 def alexa():
-    GPIO.output(24, GPIO.HIGH)
+    #GPIO.output(24, GPIO.HIGH)
     url = 'https://access-alexa-na.amazon.com/v1/avs/speechrecognizer/recognize'
     headers = {'Authorization': 'Bearer %s' % get_access_token()}
     d = {
@@ -187,7 +187,7 @@ if __name__ == "__main__":
 
         listen()
 
-    except Exception as error:
-        print(error)
+    except Exception:
         cleanup()
+        raise
     cleanup()
