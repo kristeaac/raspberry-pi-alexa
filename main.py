@@ -51,13 +51,13 @@ AVS_REQUEST_DATA = {
 class RGBLed:
     def __init__(self, red, green, blue):
         self.pins = [red, green, blue]
-        self.red = [red]
-        self.green = [green]
-        self.blue = [blue]
-        self.cyan = [green, blue]
-        self.magenta = [red, blue]
-        self.yellow = [red, green]
-        self.white = [red, green, blue]
+        self.RED = [red]
+        self.GREEN = [green]
+        self.BLUE = [blue]
+        self.CYAN = [green, blue]
+        self.MAGENTA = [red, blue]
+        self.YELLOW = [red, green]
+        self.WHITE = [red, green, blue]
         self.lock = threading.Lock()
 
     def setup(self):
@@ -158,7 +158,7 @@ def pressed():
 
 def thinking(lock):
     while lock.locked():
-        rgbLed.blink(rgbLed.yellow)
+        rgbLed.blink(rgbLed.YELLOW)
 
 
 def alexa():
@@ -194,7 +194,7 @@ def alexa():
             f.write(audio)
         lock.release()  # stop blinking
         print("Alexa is Ready to Speak")
-        rgbLed.on(rgbLed.yellow)  # show solid yellow while speaking
+        rgbLed.on(rgbLed.YELLOW)  # show solid yellow while speaking
         speak(RESPONSE_MP3)
         rgbLed.off()
     print("Alexa has Handled the Request")
@@ -218,7 +218,7 @@ def listen():
                 l, data = inp.read()
                 if l:
                     audio += data
-                rgbLed.on(rgbLed.green)
+                rgbLed.on(rgbLed.GREEN)
                 print('Recording Started')
                 recording = True
         elif recording:
@@ -237,12 +237,12 @@ if __name__ == "__main__":
     try:
         if internet_on():
             # TODO would be nice to fade this blue in and out
-            rgbLed.on(rgbLed.blue)
+            rgbLed.on(rgbLed.BLUE)
             greeting()
             rgbLed.off()
             get_access_token()
             listen()
         else:
-            rgbLed.blink(rgbLed.red)
+            rgbLed.blink(rgbLed.RED)
     finally:
         cleanup()
