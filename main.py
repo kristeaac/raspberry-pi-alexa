@@ -87,14 +87,15 @@ if __name__ == "__main__":
     try:
         # check internet connection
         if internet_on():
-            blink(blue)
+            # TODO would be nice to fade this blue in and out
+            led_on(blue)
             greeting()
+            led_off(blue)
         else:
             blink(red)
             cleanup()
 
         access_token = get_access_token()
-        print('access token: '.format(access_token))
 
         # wait for push button to be pressed
         while True:
