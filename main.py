@@ -187,6 +187,7 @@ if __name__ == "__main__":
 
         listen()
 
-    except:
+    except Exception as error:
+        print(error)
         cleanup()
     cleanup()
