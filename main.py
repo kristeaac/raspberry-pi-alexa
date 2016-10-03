@@ -25,6 +25,12 @@ def blink(pin, duration=3):
     time.sleep(duration)
     GPIO.output(pin, False)
 
+def led_on(pin):
+    GPIO.output(pin, True)
+
+def led_off(pin):
+    GPIO.output(pin, False)
+
 def internet_on():
     print "Checking Internet Connection"
     try:
@@ -36,7 +42,7 @@ def internet_on():
         return False
 
 def pressed():
-    return GPIO.input(push_button) == False
+    return not GPIO.input(push_button)
 
 if __name__ == "__main__":
     setup()
@@ -52,7 +58,9 @@ if __name__ == "__main__":
         # wait for push button to be pressed
         while True:
             if pressed():
-                blink(green)
+                led_on(green)
+	    else:
+		led_off(green)
     except:
         cleanup()
         cleaned = True
