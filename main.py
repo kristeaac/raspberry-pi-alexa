@@ -5,17 +5,19 @@ import requests
 
 refreshToken = os.environ['ALEXA_REFRESH_TOKEN']
 
-internetConnectionPin = 8
-buttonPin = 10
+red = 8
+green = 24
+blue = 25
+push_button = 10
 
 GPIO.setmode(GPIO.BOARD)
-GPIO.setup(internetConnectionPin, GPIO.OUT)
-GPIO.setup(buttonPin, GPIO.IN)
+GPIO.setup(red, GPIO.OUT)
+GPIO.setup(push_button, GPIO.IN)
 
 def cleanup():
     GPIO.cleanup()
 
-def ledOn(pin):
+def led_on(pin):
     GPIO.output(pin, True)
 
 def internet_on():
@@ -30,7 +32,7 @@ def internet_on():
 
 try:
     if internet_on():
-        ledOn(internetConnectionPin)
+        led_on(blue)
 except:
     cleanup()
 
