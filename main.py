@@ -74,6 +74,7 @@ request_data = {
 }
 
 def setup():
+    GPIO.setwarnings(False)
     GPIO.setmode(GPIO.BOARD)
     rgbLed.setup()
     GPIO.setup(push_button, GPIO.IN)
