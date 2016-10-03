@@ -112,8 +112,12 @@ def greeting():
 
 
 def cleanup():
-    GPIO.cleanup()
-    exit()
+    print("Start Cleanup and Exit")
+    try:
+        GPIO.cleanup()
+        exit()
+    finally:
+        print("Completed Cleanup and Exit. Goodbye.")
 
 
 def internet_on():
@@ -229,13 +233,10 @@ if __name__ == "__main__":
             rgbLed.on(rgbLed.blue)
             greeting()
             rgbLed.off()
+            get_access_token()
+            listen()
         else:
             rgbLed.blink(rgbLed.red)
-            cleanup()
-
-        get_access_token()
-
-        listen()
 
     finally:
         cleanup()
