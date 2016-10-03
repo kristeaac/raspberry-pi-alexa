@@ -42,7 +42,7 @@ class RGBLed:
         try:
             for pin in color:
                 GPIO.output(pin, True)
-        except:
+        finally:
             self.lock.release()
 
     def off(self):
@@ -50,7 +50,7 @@ class RGBLed:
         try:
             for pin in self.pins:
                 GPIO.output(pin, False)
-        except:
+        finally:
             self.lock.release()
 
     def blink(self, color, duration=.5, count=1):
@@ -61,7 +61,7 @@ class RGBLed:
                 time.sleep(duration)
                 self.off()
                 time.sleep(duration)
-        except:
+        finally:
             self.lock.release()
 
 rgbLed = RGBLed(33, 35, 37)
