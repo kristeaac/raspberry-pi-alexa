@@ -31,25 +31,38 @@ class RGBLed:
         self.magenta = [red, blue]
         self.yellow = [red, green]
         self.white = [red, green, blue]
+        self.lock = threading.Lock()
 
     def setup(self):
         for pin in self.pins:
             GPIO.setup(pin, GPIO.OUT)
 
     def on(self, color):
-        for pin in color:
-            GPIO.output(pin, True)
+        self.lock.acquire()
+        try:
+            for pin in color:
+                GPIO.output(pin, True)
+        except:
+            self.lock.release()
 
     def off(self):
-        for pin in self.pins:
-            GPIO.output(pin, False)
+        self.lock.acquire()
+        try:
+            for pin in self.pins:
+                GPIO.output(pin, False)
+        except:
+            self.lock.release()
 
     def blink(self, color, duration=.5, count=1):
-        for i in range(count):
-            self.on(color)
-            time.sleep(duration)
-            self.off()
-            time.sleep(duration)
+        self.lock.acquire()
+        try:
+            for i in range(count):
+                self.on(color)
+                time.sleep(duration)
+                self.off()
+                time.sleep(duration)
+        except:
+            self.lock.release()
 
 rgbLed = RGBLed(33, 35, 37)
 
@@ -155,8 +168,6 @@ def alexa():
         with open(path + "response.mp3", 'wb') as f:
             f.write(audio)
         lock.release()
-        while thinking_thread.is_alive():
-            pass # wait for thread to stop
         rgbLed.on(rgbLed.yellow)
         os.system('mpg123 -q {}1sec.mp3 {}response.mp3'.format(path, path))
         rgbLed.off()
