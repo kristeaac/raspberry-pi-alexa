@@ -5,6 +5,7 @@ import requests
 from memcache import Client
 import json
 import sys
+import alsaaudio
 
 refresh_token = os.environ['ALEXA_REFRESH_TOKEN']
 client_id = os.environ['ALEXA_CLIENT_ID']
@@ -14,6 +15,7 @@ path = os.path.realpath(__file__).rstrip(os.path.basename(__file__))
 
 servers = ["127.0.0.1:11211"]
 mc = Client(servers, debug=1)
+device = "plughw:1" # Name of your microphone/soundcard in arecord -L
 
 red = 33
 green = 35
@@ -87,16 +89,30 @@ def listen():
     while True:
         if pressed():
             if recording:
-                x = 2
+                l, data = inp.read()
+                if l:
+                    audio += data
             else:
+                inp = alsaaudio.PCM(alsaaudio.PCM_CAPTURE, alsaaudio.PCM_NORMAL, device)
+                inp.setchannels(1)
+                inp.setrate(16000)
+                inp.setformat(alsaaudio.PCM_FORMAT_S16_LE)
+                inp.setperiodsize(500)
+                audio = ""
+                l, data = inp.read()
+                if l:
+                    audio += data
                 led_on(green)
+                print('recording started')
                 recording = True
-                print('start recording')
-        else:
-            if recording:
+        elif recording:
+                rf = open(path+'recording.wav', 'w')
+                rf.write(audio)
+                rf.close()
+                inp = None
                 led_off(green)
+                print('recording stopped')
                 recording = False
-                print('stop recording')
 
 if __name__ == "__main__":
     setup()
