@@ -10,9 +10,10 @@ green = 24
 blue = 25
 push_button = 10
 
-GPIO.setmode(GPIO.BOARD)
-GPIO.setup(red, GPIO.OUT)
-GPIO.setup(push_button, GPIO.IN)
+def setup():
+    GPIO.setmode(GPIO.BOARD)
+    GPIO.setup(red, GPIO.OUT)
+    GPIO.setup(push_button, GPIO.IN)
 
 def cleanup():
     GPIO.cleanup()
@@ -32,11 +33,8 @@ def internet_on():
         print "Connection Failed"
         return False
 
-try:
+if __name__ == "__main__":
+    setup()
     if internet_on():
         blink(blue)
-
-except:
     cleanup()
-
-cleanup()
