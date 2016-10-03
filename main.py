@@ -43,10 +43,12 @@ class RGBLed:
         for pin in self.pins:
             GPIO.output(pin, False)
 
-    def blink(self, color, duration=.5):
-        self.on(color)
-        time.sleep(duration)
-        self.off()
+    def blink(self, color, duration=.5, count=1):
+        for i in range(count):
+            self.on(color)
+            time.sleep(duration)
+            self.off()
+            time.sleep(duration)
 
 rgbLed = RGBLed(33, 35, 37)
 
