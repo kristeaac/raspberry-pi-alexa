@@ -237,6 +237,8 @@ if __name__ == "__main__":
             listen()
         else:
             rgbLed.blink(rgbLed.red)
-
+    except Exception as error:
+        print(error)
+        raise error
     finally:
         cleanup()
