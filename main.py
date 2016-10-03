@@ -4,6 +4,7 @@ import os
 import requests
 from memcache import Client
 import json
+import sys
 
 refresh_token = os.environ['ALEXA_REFRESH_TOKEN']
 client_id = os.environ['ALEXA_CLIENT_ID']
@@ -85,15 +86,19 @@ def listen():
     recording = False
     while True:
         if pressed():
-            if not recording:
+            if recording:
+                sys.stdout.write('.')
+                sys.stdout.flush()
+            else:
                 led_on(green)
                 recording = True
-                print('start recording')
+                sys.stdout.write('recording')
+                sys.stdout.flush()
         else:
             if recording:
                 led_off(green)
                 recording = False
-                print('stop recording')
+                print('\nstop recording')
 
 if __name__ == "__main__":
     setup()
