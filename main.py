@@ -4,6 +4,7 @@ import os
 import requests
 
 refreshToken = os.environ['ALEXA_REFRESH_TOKEN']
+path = os.path.realpath(__file__).rstrip(os.path.basename(__file__))
 
 red = 33
 green = 35
@@ -18,6 +19,9 @@ def setup():
         GPIO.setup(pin, GPIO.OUT)
     GPIO.setup(push_button, GPIO.IN)
 
+
+def greeting():
+    os.system('mpg123 -q {}1sec.mp3 {}hello.mp3'.format(path, path))
 
 def cleanup():
     GPIO.cleanup()
@@ -62,6 +66,8 @@ if __name__ == "__main__":
         else:
             blink(red)
             cleanup()
+
+        greeting()
 
         # wait for push button to be pressed
         while True:
