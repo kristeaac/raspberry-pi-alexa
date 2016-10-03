@@ -87,18 +87,16 @@ def listen():
     while True:
         if pressed():
             if recording:
-                sys.stdout.write('.')
-                sys.stdout.flush()
+                x = 2
             else:
                 led_on(green)
                 recording = True
-                sys.stdout.write('recording')
-                sys.stdout.flush()
+                print('start recording')
         else:
             if recording:
                 led_off(green)
                 recording = False
-                print('\nstop recording')
+                print('stop recording')
 
 if __name__ == "__main__":
     setup()
