@@ -21,7 +21,7 @@ push_button = 10
 
 class RGBLed:
 
-    def __init_(self, red, green, blue):
+    def __init__(self, red, green, blue):
         self.pins = [red, green, blue]
         self.red = [red]
         self.green = [green]
