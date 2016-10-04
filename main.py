@@ -85,16 +85,10 @@ class RGBLed:
             self.lock.release()
 
     def fade_in(self, color):
-        self.lock.acquire()
-        try:
-            for i in range(100):
-                for pin in color:
-                    self.pmws[pin].ChangeDutyCycle(i)
-                    time.sleep(0.05)
-        except Exception as error:
-            print(error)
-        finally:
-            self.lock.release()
+        for i in range(100):
+            for pin in color:
+                self.pmws[pin].ChangeDutyCycle(i)
+                time.sleep(0.05)
 
     def fade_out(self, color):
         self.lock.acquire()
