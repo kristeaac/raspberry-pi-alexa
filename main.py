@@ -16,7 +16,7 @@ PATH = os.path.realpath(__file__).rstrip(os.path.basename(__file__))
 
 SERVERS = ["127.0.0.1:11211"]
 CACHE = Client(SERVERS, debug=1)
-DEVICE = "plughw:1"  # Name of your microphone/soundcard in arecord -L
+DEVICE = "plughw:1"
 
 HELLO_MP3 = PATH + 'hello.mp3'
 RECORDING_WAV = PATH + 'recording.wav'
@@ -64,9 +64,6 @@ class RGBLed:
     def setup(self):
         for pin in self.pins:
             GPIO.setup(pin, GPIO.OUT)
-            # pwm = GPIO.PWM(pin, 50)
-            # pwm.start(0)
-            # self.pwms[pin] = pwm
 
     def on(self, color):
         self.lock.acquire()
@@ -83,32 +80,6 @@ class RGBLed:
                 GPIO.output(pin, False)
         finally:
             self.lock.release()
-
-    def fade_in(self, color):
-        self.lock.acquire()
-        try:
-            for i in range(100):
-                for pin in color:
-                    self.pwms[pin].ChangeDutyCycle(i)
-                time.sleep(0.001)
-            for pin in color:
-                GPIO.output(pin, True)
-        finally:
-            self.lock.release()
-
-    def fade_out(self, color):
-        self.lock.acquire()
-        try:
-            for i in range(100, 0, -1):
-                for pin in color:
-                    self.pwms[pin].ChangeDutyCycle(i)
-                time.sleep(0.001)
-	    for pin in self.pins:
- 		self.pwms[pin].ChangeDutyCycle(0)
-                GPIO.output(pin, False)
-        finally:
-            self.lock.release()
-
 
     def blink(self, color, duration=.5, count=1):
         self.lock.acquire()
