@@ -59,11 +59,14 @@ class RGBLed:
         self.YELLOW = [red, green]
         self.WHITE = [red, green, blue]
         self.lock = threading.Lock()
-        self.pmws = {}
+        self.pwms = {}
 
     def setup(self):
         for pin in self.pins:
             GPIO.setup(pin, GPIO.OUT)
+            pwm = GPIO.PWM(pin, 50)
+            pwm.start(0)
+            self.pwms[pin] = pwm
 
     def on(self, color):
         self.lock.acquire()
@@ -78,16 +81,13 @@ class RGBLed:
         try:
             for pin in self.pins:
                 GPIO.output(pin, False)
-                pwm = GPIO.PWM(pin, 50)
-                pwm.start(0)
-                self.pmws[pin] = pwm
         finally:
             self.lock.release()
 
     def fade_in(self, color):
         for i in range(100):
             for pin in color:
-                self.pmws[pin].ChangeDutyCycle(i)
+                self.pwms[pin].ChangeDutyCycle(i)
                 time.sleep(0.05)
 
     def fade_out(self, color):
@@ -95,7 +95,7 @@ class RGBLed:
         try:
             for i in range(100, 0, -1):
                 for pin in color:
-                    self.pmws[pin].ChangeDutyCycle(i)
+                    self.pwms[pin].ChangeDutyCycle(i)
                     time.sleep(0.05)
         finally:
             self.lock.release()
