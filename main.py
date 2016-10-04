@@ -91,6 +91,8 @@ class RGBLed:
                 for pin in color:
                     self.pmws[pin].ChangeDutyCycle(i)
                     time.sleep(0.05)
+        except Exception as error:
+            print(error)
         finally:
             self.lock.release()
 
