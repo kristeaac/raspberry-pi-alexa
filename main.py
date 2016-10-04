@@ -162,43 +162,47 @@ def thinking(lock):
 
 
 def alexa():
-    print("Alexa is Thinking")
-    # blink yellow while Alexa is thinking
-    lock = threading.Lock()
-    lock.acquire()
-    thinking_thread = threading.Thread(target=thinking, args=(lock, ))
-    thinking_thread.start()
-
     global AVS_URL
     global AVS_REQUEST_DATA
     global RECORDING_WAV
     global RESPONSE_MP3
 
-    headers = {'Authorization': 'Bearer %s' % get_access_token()}
+    lock = threading.Lock()
+    lock.acquire()
+    thinking_thread = threading.Thread(target=thinking, args=(lock, ))
+    thinking_thread.start()
 
-    with open(RECORDING_WAV) as inf:
-        files = [
-            ('file', ('request', json.dumps(AVS_REQUEST_DATA), 'application/json; charset=UTF-8')),
-            ('file', ('audio', inf, 'audio/L16; rate=16000; channels=1'))
-        ]
-        response = requests.post(AVS_URL, headers=headers, files=files)
-    if response.status_code == 200:
-        for v in response.headers['content-type'].split(";"):
-            if re.match('.*boundary.*', v):
-                boundary = v.split("=")[1]
-        response_ata = response.content.split(boundary)
-        for d in response_ata:
-            if len(d) >= 1024:
-                audio = d.split('\r\n\r\n')[1].rstrip('--')
-        with open(RESPONSE_MP3, 'wb') as f:
-            f.write(audio)
-        lock.release()  # stop blinking
-        print("Alexa is Ready to Speak")
-        rgbLed.on(rgbLed.YELLOW)  # show solid yellow while speaking
-        speak(RESPONSE_MP3)
-        rgbLed.off()
-    print("Alexa has Handled the Request")
+    try:
+        print("Alexa is Thinking")
+        # blink yellow while Alexa is thinking
 
+        headers = {'Authorization': 'Bearer %s' % get_access_token()}
+
+        with open(RECORDING_WAV) as inf:
+            files = [
+                ('file', ('request', json.dumps(AVS_REQUEST_DATA), 'application/json; charset=UTF-8')),
+                ('file', ('audio', inf, 'audio/L16; rate=16000; channels=1'))
+            ]
+            response = requests.post(AVS_URL, headers=headers, files=files)
+        if response.status_code == 200:
+            for v in response.headers['content-type'].split(";"):
+                if re.match('.*boundary.*', v):
+                    boundary = v.split("=")[1]
+            response_ata = response.content.split(boundary)
+            for d in response_ata:
+                if len(d) >= 1024:
+                    audio = d.split('\r\n\r\n')[1].rstrip('--')
+            with open(RESPONSE_MP3, 'wb') as f:
+                f.write(audio)
+            lock.release()  # stop blinking
+            print("Alexa is Ready to Speak")
+            rgbLed.on(rgbLed.YELLOW)  # show solid yellow while speaking
+            speak(RESPONSE_MP3)
+            rgbLed.off()
+        print("Alexa has Handled the Request")
+    finally:
+        if lock:
+            lock.release()
 
 def listen():
     recording = False
