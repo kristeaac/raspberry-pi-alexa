@@ -7,6 +7,7 @@ import alsaaudio
 import re
 import threading
 from led import Led
+from rgbled import RGBLed
 
 REFRESH_TOKEN = os.environ['ALEXA_REFRESH_TOKEN']
 CLIENT_ID = os.environ['ALEXA_CLIENT_ID']
@@ -47,18 +48,21 @@ AVS_REQUEST_DATA = {
     }
 }
 
-bad_led = Led(33) # red
-recording_led = Led(35) # green
-ok_led = Led(37) # blue
-working_led = ok_led # until we add yellow
-leds = [bad_led, recording_led, ok_led]
+# bad_led = Led(33) # red
+# recording_led = Led(35) # green
+# ok_led = Led(37) # blue
+# working_led = ok_led # until we add yellow
+# leds = [bad_led, recording_led, ok_led]
+
+rgbLed = RGBLed(33, 35, 37)
 
 def setup():
     print("Started GPIO Setup")
     GPIO.setwarnings(False)
     GPIO.setmode(GPIO.BOARD)
-    for led in leds:
-        led.setup()
+    rgbLed.setup()
+    # for led in leds:
+    #     led.setup()
     GPIO.setup(PUSH_BUTTON, GPIO.IN)
     print("GPIO Setup Complete")
 
@@ -115,7 +119,7 @@ def pressed():
 
 def thinking(lock):
     while lock.locked():
-        working_led.blink()
+        rgbLed.blink(rgbLed.YELLOW)
 
 
 def alexa():
@@ -152,9 +156,9 @@ def alexa():
                 f.write(audio)
             lock.release()  # stop blinking
             print("Alexa is Ready to Speak")
-            working_led.on()
+            rgbLed.on(rgbLed.YELLOW)
             speak(RESPONSE_MP3)
-            working_led.off()
+            rgbLed.off()
         print("Alexa has Handled the Request")
     finally:
         if lock and lock.locked():
@@ -179,7 +183,7 @@ def listen():
                 l, data = inp.read()
                 if l:
                     audio += data
-                recording_led.on()
+                rgbLed.on(rgbLed.GREEN)
                 print('Recording Started')
                 recording = True
         elif recording:
@@ -187,7 +191,7 @@ def listen():
             rf.write(audio)
             rf.close()
             inp = None
-            recording_led.off()
+            rgbLed.off()
             print('Recording Stopped')
             recording = False
             alexa()
@@ -197,12 +201,12 @@ if __name__ == "__main__":
     setup()
     try:
         if internet_on():
-            ok_led.on()
+            rgbLed.on(rgbLed.BLUE)
             greeting()
-            ok_led.off()
+            rgbLed.off()
             get_access_token()
             listen()
         else:
-            bad_led.off()
+            rgbLed.on(rgbLed.RED).on()
     finally:
         cleanup()
