@@ -6,7 +6,7 @@ import time
 class Led:
     def __init__(self, pin):
         self.pin = pin
-        self.lock = threading.lock()
+        self.lock = threading.Lock()
 
     def setup(self):
         GPIO.setup(self.pin, GPIO.OUT)
