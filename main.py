@@ -201,7 +201,7 @@ def alexa():
             rgbLed.off()
         print("Alexa has Handled the Request")
     finally:
-        if lock:
+        if lock and lock.locked():
             lock.release()
 
 def listen():
