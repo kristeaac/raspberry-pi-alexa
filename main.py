@@ -47,6 +47,18 @@ AVS_REQUEST_DATA = {
     }
 }
 
+class Led:
+    def __init__(self, pin):
+        self.pin = pin
+
+    def setup(self):
+        GPIO.setup(self.pin, GPIO.OUT)
+
+    def on(self):
+        GPIO.output(self.pin, True)
+
+    def off(self):
+        GPIO.output(self.pin, False)
 
 class RGBLed:
     def __init__(self, red, green, blue):
@@ -95,6 +107,7 @@ class RGBLed:
             self.lock.release()
 
 
+powerLed = Led(31)
 rgbLed = RGBLed(33, 35, 37)
 
 
@@ -102,8 +115,10 @@ def setup():
     print("Started GPIO Setup")
     GPIO.setwarnings(False)
     GPIO.setmode(GPIO.BOARD)
+    powerLed.setup()
     rgbLed.setup()
     GPIO.setup(PUSH_BUTTON, GPIO.IN)
+    powerLed.on()
     print("GPIO Setup Complete")
 
 
@@ -119,6 +134,7 @@ def greeting():
 def cleanup():
     print("Started GPIO Cleanup")
     try:
+        powerLed.on()
         GPIO.cleanup()
         exit()
     finally:
