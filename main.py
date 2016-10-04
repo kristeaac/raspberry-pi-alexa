@@ -59,6 +59,7 @@ class RGBLed:
         self.YELLOW = [red, green]
         self.WHITE = [red, green, blue]
         self.lock = threading.Lock()
+        self.pmws = {}
 
     def setup(self):
         for pin in self.pins:
@@ -77,8 +78,32 @@ class RGBLed:
         try:
             for pin in self.pins:
                 GPIO.output(pin, False)
+                pwm = GPIO.PWM(pin, 50)
+                pwm.start(0)
+                self.pmws[pin] = pwm
         finally:
             self.lock.release()
+
+    def fade_in(self, color):
+        self.lock.acquire()
+        try:
+            for i in range(100):
+                for pin in color:
+                    self.pmws[pin].ChangeDutyCycle(i)
+                    time.sleep(0.05)
+        finally:
+            self.lock.release()
+
+    def fade_out(self, color):
+        self.lock.acquire()
+        try:
+            for i in range(100, 0, -1):
+                for pin in color:
+                    self.pmws[pin].ChangeDutyCycle(i)
+                    time.sleep(0.05)
+        finally:
+            self.lock.release()
+
 
     def blink(self, color, duration=.5, count=1):
         self.lock.acquire()
@@ -204,6 +229,7 @@ def alexa():
         if lock and lock.locked():
             lock.release()
 
+
 def listen():
     recording = False
     while True:
@@ -240,10 +266,9 @@ if __name__ == "__main__":
     setup()
     try:
         if internet_on():
-            # TODO would be nice to fade this blue in and out
-            rgbLed.on(rgbLed.BLUE)
+            rgbLed.fade_in(rgbLed.BLUE)
             greeting()
-            rgbLed.off()
+            rgbLed.fade_out(rgbLed.BLUE)
             get_access_token()
             listen()
         else:
