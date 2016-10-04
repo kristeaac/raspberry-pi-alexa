@@ -64,9 +64,9 @@ class RGBLed:
     def setup(self):
         for pin in self.pins:
             GPIO.setup(pin, GPIO.OUT)
-            pwm = GPIO.PWM(pin, 50)
-            pwm.start(0)
-            self.pwms[pin] = pwm
+            # pwm = GPIO.PWM(pin, 50)
+            # pwm.start(0)
+            # self.pwms[pin] = pwm
 
     def on(self, color):
         self.lock.acquire()
@@ -270,9 +270,9 @@ if __name__ == "__main__":
     setup()
     try:
         if internet_on():
-            rgbLed.fade_in(rgbLed.BLUE)
+            rgbLed.on(rgbLed.BLUE)
             greeting()
-            rgbLed.fade_out(rgbLed.BLUE)
+            rgbLed.off()
             get_access_token()
             listen()
         else:
