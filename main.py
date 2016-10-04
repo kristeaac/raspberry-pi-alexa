@@ -90,7 +90,7 @@ class RGBLed:
             for i in range(100):
                 for pin in color:
                     self.pwms[pin].ChangeDutyCycle(i)
-                    time.sleep(0.05)
+                    time.sleep(0.001)
             for pin in color:
                 GPIO.output(pin, True)
         finally:
@@ -102,7 +102,7 @@ class RGBLed:
             for i in range(100, 0, -1):
                 for pin in color:
                     self.pwms[pin].ChangeDutyCycle(i)
-                    time.sleep(0.05)
+                    time.sleep(0.001)
             for pin in color:
                 GPIO.output(pin, False)
         finally:
