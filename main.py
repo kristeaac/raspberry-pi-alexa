@@ -7,7 +7,6 @@ import json
 import alsaaudio
 import re
 import threading
-from led import Led
 
 REFRESH_TOKEN = os.environ['ALEXA_REFRESH_TOKEN']
 CLIENT_ID = os.environ['ALEXA_CLIENT_ID']
@@ -47,6 +46,7 @@ AVS_REQUEST_DATA = {
         "format": "audio/L16; rate=16000; channels=1"
     }
 }
+
 
 class RGBLed:
     def __init__(self, red, green, blue):
@@ -95,7 +95,6 @@ class RGBLed:
             self.lock.release()
 
 
-powerLed = Led(31)
 rgbLed = RGBLed(33, 35, 37)
 
 
@@ -103,10 +102,8 @@ def setup():
     print("Started GPIO Setup")
     GPIO.setwarnings(False)
     GPIO.setmode(GPIO.BOARD)
-    powerLed.setup()
     rgbLed.setup()
     GPIO.setup(PUSH_BUTTON, GPIO.IN)
-    powerLed.on()
     print("GPIO Setup Complete")
 
 
@@ -122,7 +119,6 @@ def greeting():
 def cleanup():
     print("Started GPIO Cleanup")
     try:
-        powerLed.on()
         GPIO.cleanup()
         exit()
     finally:
