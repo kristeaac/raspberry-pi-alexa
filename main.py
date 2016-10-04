@@ -1,5 +1,4 @@
 import RPi.GPIO as GPIO
-import time
 import os
 import requests
 from memcache import Client
@@ -7,6 +6,7 @@ import json
 import alsaaudio
 import re
 import threading
+from led import Led
 
 REFRESH_TOKEN = os.environ['ALEXA_REFRESH_TOKEN']
 CLIENT_ID = os.environ['ALEXA_CLIENT_ID']
@@ -47,62 +47,18 @@ AVS_REQUEST_DATA = {
     }
 }
 
-
-class RGBLed:
-    def __init__(self, red, green, blue):
-        self.pins = [red, green, blue]
-        self.RED = [red]
-        self.GREEN = [green]
-        self.BLUE = [blue]
-        self.CYAN = [green, blue]
-        self.MAGENTA = [red, blue]
-        self.YELLOW = [red, green]
-        self.WHITE = [red, green, blue]
-        self.lock = threading.Lock()
-        self.pwms = {}
-
-    def setup(self):
-        for pin in self.pins:
-            GPIO.setup(pin, GPIO.OUT)
-
-    def on(self, color):
-        self.lock.acquire()
-        try:
-            for pin in color:
-                GPIO.output(pin, True)
-        finally:
-            self.lock.release()
-
-    def off(self):
-        self.lock.acquire()
-        try:
-            for pin in self.pins:
-                GPIO.output(pin, False)
-        finally:
-            self.lock.release()
-
-    def blink(self, color, duration=.5, count=1):
-        self.lock.acquire()
-        try:
-            for i in range(count):
-                for pin in color:
-                    GPIO.output(pin, True)
-                time.sleep(duration)
-                for pin in self.pins:
-                    GPIO.output(pin, False)
-                time.sleep(duration)
-        finally:
-            self.lock.release()
-
-
-rgbLed = RGBLed(33, 35, 37)
-
+bad_led = Led(33) # red
+recording_led = Led(35) # green
+ok_led = Led(37) # blue
+working_led = ok_led # until we add yellow
+leds = [bad_led, recording_led, ok_led]
 
 def setup():
     print("Started GPIO Setup")
     GPIO.setwarnings(False)
     GPIO.setmode(GPIO.BOARD)
-    rgbLed.setup()
+    for led in leds:
+        led.setup()
     GPIO.setup(PUSH_BUTTON, GPIO.IN)
     print("GPIO Setup Complete")
 
@@ -159,7 +115,7 @@ def pressed():
 
 def thinking(lock):
     while lock.locked():
-        rgbLed.blink(rgbLed.YELLOW)
+        working_led.blink()
 
 
 def alexa():
@@ -175,7 +131,6 @@ def alexa():
 
     try:
         print("Alexa is Thinking")
-        # blink yellow while Alexa is thinking
 
         headers = {'Authorization': 'Bearer %s' % get_access_token()}
 
@@ -197,9 +152,9 @@ def alexa():
                 f.write(audio)
             lock.release()  # stop blinking
             print("Alexa is Ready to Speak")
-            rgbLed.on(rgbLed.YELLOW)  # show solid yellow while speaking
+            working_led.on()
             speak(RESPONSE_MP3)
-            rgbLed.off()
+            working_led.off()
         print("Alexa has Handled the Request")
     finally:
         if lock and lock.locked():
@@ -224,7 +179,7 @@ def listen():
                 l, data = inp.read()
                 if l:
                     audio += data
-                rgbLed.on(rgbLed.GREEN)
+                recording_led.on()
                 print('Recording Started')
                 recording = True
         elif recording:
@@ -232,7 +187,7 @@ def listen():
             rf.write(audio)
             rf.close()
             inp = None
-            rgbLed.off()
+            recording_led.off()
             print('Recording Stopped')
             recording = False
             alexa()
@@ -242,12 +197,12 @@ if __name__ == "__main__":
     setup()
     try:
         if internet_on():
-            rgbLed.on(rgbLed.BLUE)
+            ok_led.on()
             greeting()
-            rgbLed.off()
+            ok_led.off()
             get_access_token()
             listen()
         else:
-            rgbLed.blink(rgbLed.RED)
+            bad_led.off()
     finally:
         cleanup()
