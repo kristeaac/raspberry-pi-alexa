@@ -6,7 +6,6 @@ import json
 import alsaaudio
 import re
 import threading
-from led import Led
 from rgbled import RGBLed
 
 REFRESH_TOKEN = os.environ['ALEXA_REFRESH_TOKEN']
@@ -48,12 +47,6 @@ AVS_REQUEST_DATA = {
     }
 }
 
-# bad_led = Led(33) # red
-# recording_led = Led(35) # green
-# ok_led = Led(37) # blue
-# working_led = ok_led # until we add yellow
-# leds = [bad_led, recording_led, ok_led]
-
 rgbLed = RGBLed(33, 35, 37)
 
 def setup():
@@ -61,8 +54,6 @@ def setup():
     GPIO.setwarnings(False)
     GPIO.setmode(GPIO.BOARD)
     rgbLed.setup()
-    # for led in leds:
-    #     led.setup()
     GPIO.setup(PUSH_BUTTON, GPIO.IN)
     print("GPIO Setup Complete")
 

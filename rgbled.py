@@ -1,38 +1,47 @@
 import RPi.GPIO as GPIO
 import time
 import threading
+from enum import Enum
+
+
+class Color(Enum):
+    red = 0,
+    green = 1,
+    blue = 2,
+    cyan = 3,
+    magenta = 4,
+    yellow = 5,
+    white = 6
 
 
 class RGBLed:
-    def __init__(self, red, green, blue):
-        self.pins = [red, green, blue]
-        self.RED = [red]
-        self.GREEN = [green]
-        self.BLUE = [blue]
-        self.CYAN = [green, blue]
-        self.MAGENTA = [red, blue]
-        self.YELLOW = [red, green]
-        self.WHITE = [red, green, blue]
+    def __init__(self, red_pin, green_pin, blue_pin):
+        self.pins = [red_pin, green_pin, blue_pin]
+        self.color_map = {
+            Color.red: [red_pin],
+            Color.green: [green_pin],
+            Color.blue: [blue_pin],
+            Color.cyan: [green_pin, blue_pin],
+            Color.magenta: [red_pin, blue_pin],
+            Color.yellow: [red_pin, green_pin],
+            Color.white: [red_pin, green_pin, blue_pin],
+        }
         self.lock = threading.Lock()
-        self.pwms = {}
 
     def setup(self):
-        for pin in self.pins:
-            GPIO.setup(pin, GPIO.OUT)
+        GPIO.setup(self.pins, GPIO.OUT)
 
     def on(self, color):
         self.lock.acquire()
         try:
-            for pin in color:
-                GPIO.output(pin, True)
+            GPIO.output(self.color_map[color], True)
         finally:
             self.lock.release()
 
     def off(self):
         self.lock.acquire()
         try:
-            for pin in self.pins:
-                GPIO.output(pin, False)
+            GPIO.output(self.pins, False)
         finally:
             self.lock.release()
 
@@ -40,11 +49,9 @@ class RGBLed:
         self.lock.acquire()
         try:
             for i in range(count):
-                for pin in color:
-                    GPIO.output(pin, True)
+                GPIO.output(self.color_map[color], True)
                 time.sleep(duration)
-                for pin in self.pins:
-                    GPIO.output(pin, False)
+                GPIO.output(self.color_map[color], False)
                 time.sleep(duration)
         finally:
             self.lock.release()
