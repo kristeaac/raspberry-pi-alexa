@@ -158,6 +158,7 @@ def alexa():
 
 def listen():
     recording = False
+    rgbLed.on(Color.white)
     while True:
         if pressed():
             if recording:
@@ -186,6 +187,7 @@ def listen():
             print('Recording Stopped')
             recording = False
             alexa()
+            rgbLed.on(Color.white)
 
 
 if __name__ == "__main__":

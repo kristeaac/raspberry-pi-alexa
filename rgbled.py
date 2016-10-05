@@ -34,6 +34,7 @@ class RGBLed:
     def on(self, color):
         self.lock.acquire()
         try:
+            GPIO.output(self.pins, False)
             GPIO.output(self.color_map[color], True)
         finally:
             self.lock.release()
@@ -48,6 +49,7 @@ class RGBLed:
     def blink(self, color, duration=.5, count=1):
         self.lock.acquire()
         try:
+            GPIO.output(self.pins, False)
             for i in range(count):
                 GPIO.output(self.color_map[color], True)
                 time.sleep(duration)
