@@ -6,7 +6,7 @@ import json
 import alsaaudio
 import re
 import threading
-from rgbled import RGBLed
+from rgbled import RGBLed, Color
 
 REFRESH_TOKEN = os.environ['ALEXA_REFRESH_TOKEN']
 CLIENT_ID = os.environ['ALEXA_CLIENT_ID']
@@ -110,7 +110,7 @@ def pressed():
 
 def thinking(lock):
     while lock.locked():
-        rgbLed.blink(rgbLed.YELLOW)
+        rgbLed.blink(Color.yellow)
 
 
 def alexa():
@@ -147,7 +147,7 @@ def alexa():
                 f.write(audio)
             lock.release()  # stop blinking
             print("Alexa is Ready to Speak")
-            rgbLed.on(rgbLed.YELLOW)
+            rgbLed.on(Color.yellow)
             speak(RESPONSE_MP3)
             rgbLed.off()
         print("Alexa has Handled the Request")
@@ -174,7 +174,7 @@ def listen():
                 l, data = inp.read()
                 if l:
                     audio += data
-                rgbLed.on(rgbLed.GREEN)
+                rgbLed.on(Color.green)
                 print('Recording Started')
                 recording = True
         elif recording:
@@ -192,12 +192,12 @@ if __name__ == "__main__":
     setup()
     try:
         if internet_on():
-            rgbLed.on(rgbLed.BLUE)
+            rgbLed.on(Color.blue)
             greeting()
             rgbLed.off()
             get_access_token()
             listen()
         else:
-            rgbLed.on(rgbLed.RED).on()
+            rgbLed.on(Color.red).on()
     finally:
         cleanup()
