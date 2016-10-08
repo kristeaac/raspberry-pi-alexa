@@ -12,7 +12,7 @@ A [pushbutton](https://www.amazon.com/6x6x6mm-Momentary-Push-Button-Switch/dp/B0
 * __solid yellow__ - playing response from Alexa
 
 ### Software
-Follow [this tutorial]([the video tutorial](https://www.youtube.com/watch?v=frH9HaQTFL8)) for a one-time install of the necessary dependencies for this project, and for obtaining the client credentials and refresh token needed to call AVS.
+Follow [this tutorial](https://www.youtube.com/watch?v=frH9HaQTFL8) for a one-time install of the necessary dependencies for this project, and for obtaining the client credentials and refresh token needed to call AVS.
 
 Once you have your client credentials and refresh token, set them as environment variables on your Pi:
 
