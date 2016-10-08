@@ -22,7 +22,7 @@ $ export ALEXA_CLIENT_ID="<YOUR_CLIENT_ID>"
 $ export ALEXA_CLIENT_SECRET="<YOUR_CLIENT_SECRET>"
 ```
 
-These environment variables are needed in [main.py](main.py) to obtain an AVS access token:
+These environment variables are needed in [main.py](main.py#L11-L13) to obtain an AVS access token:
 
 ```
 REFRESH_TOKEN = os.environ['ALEXA_REFRESH_TOKEN']
