@@ -4,17 +4,17 @@ This project is an example of an Alexa-enabled Raspberry Pi using the [Alexa Voi
 ## Setup
 ### Hardware
 A [pushbutton](https://www.amazon.com/6x6x6mm-Momentary-Push-Button-Switch/dp/B01GN79QF8) and an [RGB LED](https://www.amazon.com/DIY-3-Color-RGB-Module-Arduino/dp/B0100A92BC) wired to the Raspberry Pi are used to interface with Alexa. Similar to [the Amazon Tap](https://www.amazon.com/Amazon-Tap-Alexa-Enabled-Portable-Bluetooth/dp/B01BH83OOM), this device is not "always listening", but rather, you have to press and hold the pushbutton while speaking. The LED indicates the current state of the client:
-* **blue** - starting up
-* **red** - no internet connection
-* **white** - ready
-* **green** - recording speech
-* **blinking yellow** - posting Speech to Alexa and waiting for response
-* **solid yellow** - playing response from Alexa
+* __blue__ - starting up
+* __red__ - no internet connection
+* __white__ - ready
+* __green__ - recording speech
+* __blinking yellow__ - posting Speech to Alexa and waiting for response
+* __solid yellow__ - playing response from Alexa
 
 ### Software
 Follow [this tutorial]([the video tutorial](https://www.youtube.com/watch?v=frH9HaQTFL8)) for a one-time install of the necessary dependencies for this project, and for obtaining the client credentials and refresh token needed to call AVS.
 
-Once you have your client credentials and refresh token, add them as environment variables:
+Once you have your client credentials and refresh token, set them as environment variables on your Pi:
 
 ```
 $ export ALEXA_REFRESH_TOKEN="<YOUR_REFRESH_TOKEN>"
