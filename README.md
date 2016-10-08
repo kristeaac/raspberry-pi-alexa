@@ -3,7 +3,7 @@ This project is an example of an Alexa-enabled Raspberry Pi using the [Alexa Voi
 
 ## Setup
 ### Hardware
-A pushbutton and an RGB LED wired to the Raspberry Pi are used interface with Alexa. Similar to [the Amazon Tap](https://www.amazon.com/Amazon-Tap-Alexa-Enabled-Portable-Bluetooth/dp/B01BH83OOM), this device is not "always listening", but rather, you have to press and hold the pushbutton while speaking. The LED indicates the current state of the client:
+A [pushbutton](https://www.amazon.com/6x6x6mm-Momentary-Push-Button-Switch/dp/B01GN79QF8) and an [RGB LED](https://www.amazon.com/DIY-3-Color-RGB-Module-Arduino/dp/B0100A92BC) wired to the Raspberry Pi are used to interface with Alexa. Similar to [the Amazon Tap](https://www.amazon.com/Amazon-Tap-Alexa-Enabled-Portable-Bluetooth/dp/B01BH83OOM), this device is not "always listening", but rather, you have to press and hold the pushbutton while speaking. The LED indicates the current state of the client:
 * **blue** - starting up
 * **red** - no internet connection
 * **white** - ready
