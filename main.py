@@ -126,6 +126,12 @@ def listen():
             alexa(RECORDING_WAV, start_thinking_callback=start_thinking, end_thinking_callback=end_thinking)
 
 
+def tts():
+    while True:
+        text = raw_input('Command: ')
+        alexa(ttw(text), start_thinking_callback=start_thinking, end_thinking_callback=end_thinking)
+
+
 if __name__ == "__main__":
     opts, args = getopt.getopt(sys.argv[1:], 't:i:', ['type=', 'input='])
     input_type = 'voice'
@@ -148,6 +154,11 @@ if __name__ == "__main__":
                 alexa(input, start_thinking_callback=start_thinking, end_thinking_callback=end_thinking)
             elif input_type == 'text':
                 alexa(ttw(input), start_thinking_callback=start_thinking, end_thinking_callback=end_thinking)
+            elif input_type == 'tts':
+                tts()
+            else:
+                print('Input type not recognized')
+                exit()
         else:
             rgbLed.on(Color.red).on()
     finally:
