@@ -18,9 +18,9 @@ SERVERS = ["127.0.0.1:11211"]
 CACHE = Client(SERVERS, debug=1)
 DEVICE = "plughw:1"
 
-HELLO_MP3 = PATH + 'hello.mp3'
-RECORDING_WAV = PATH + 'recording.wav'
-RESPONSE_MP3 = PATH + 'response.mp3'
+HELLO_MP3 = PATH + 'audio/hello.mp3'
+RECORDING_WAV = PATH + 'audio/recording.wav'
+RESPONSE_MP3 = PATH + 'audio/response.mp3'
 
 PUSH_BUTTON = 10
 
@@ -59,7 +59,7 @@ def setup():
 
 
 def speak(utterance_file):
-    os.system('mpg123 -q {}1sec.mp3 {}'.format(PATH, utterance_file))
+    os.system('mpg123 -q {}audio/1sec.mp3 {}'.format(PATH, utterance_file))
 
 
 def greeting():
