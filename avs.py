@@ -1,26 +1,16 @@
-import RPi.GPIO as GPIO
-import os
 import requests
 from memcache import Client
+import os
 import json
-import alsaaudio
-import re
 import threading
-from rgbled import RGBLed, Color
+import re
 
 REFRESH_TOKEN = os.environ['ALEXA_REFRESH_TOKEN']
 CLIENT_ID = os.environ['ALEXA_CLIENT_ID']
 CLIENT_SECRET = os.environ['ALEXA_CLIENT_SECRET']
 
-PATH = os.path.realpath(__file__).rstrip(os.path.basename(__file__))
-
 SERVERS = ["127.0.0.1:11211"]
 CACHE = Client(SERVERS, debug=1)
-DEVICE = "plughw:1"
-
-HELLO_MP3 = PATH + 'audio/hello.mp3'
-RECORDING_WAV = PATH + 'audio/recording.wav'
-RESPONSE_MP3 = PATH + 'audio/response.mp3'
 
 # AVS
 AVS_URL = 'https://access-alexa-na.amazon.com/v1/avs/speechrecognizer/recognize'
@@ -45,45 +35,6 @@ AVS_REQUEST_DATA = {
     }
 }
 
-rgbLed = RGBLed(33, 35, 37)
-
-def setup():
-    print("Started GPIO Setup")
-    GPIO.setwarnings(False)
-    GPIO.setmode(GPIO.BOARD)
-    rgbLed.setup()
-    print("GPIO Setup Complete")
-
-
-def speak(utterance_file):
-    os.system('mpg123 -q {}audio/1sec.mp3 {}'.format(PATH, utterance_file))
-
-
-def greeting():
-    global HELLO_MP3
-    speak(HELLO_MP3)
-
-
-def cleanup():
-    print("Started GPIO Cleanup")
-    try:
-        GPIO.cleanup()
-        exit()
-    finally:
-        print("Cleanup Complete")
-
-
-def internet_on():
-    print "Checking Internet Connection"
-    try:
-        requests.get('https://api.amazon.com/auth/o2/token')
-        print "Connection OK"
-        return True
-    except:
-        print "Connection Failed"
-        return False
-
-
 def get_access_token():
     token = CACHE.get("access_token")
     global REFRESH_TOKEN
@@ -99,12 +50,6 @@ def get_access_token():
         return resp['access_token']
     else:
         return False
-
-
-def thinking(lock):
-    while lock.locked():
-        rgbLed.blink(Color.yellow)
-
 
 def alexa(recording):
     global AVS_URL
@@ -146,19 +91,3 @@ def alexa(recording):
     finally:
         if lock and lock.locked():
             lock.release()
-
-
-
-if __name__ == "__main__":
-    setup()
-    try:
-        if internet_on():
-            rgbLed.on(Color.blue)
-            greeting()
-            rgbLed.off()
-            get_access_token()
-            alexa('audio/sample.wav')
-        else:
-            rgbLed.on(Color.red).on()
-    finally:
-        cleanup()
