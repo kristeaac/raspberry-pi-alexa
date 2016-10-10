@@ -6,6 +6,7 @@ from rgbled import RGBLed, Color
 from avs import get_access_token, alexa
 import sys
 import getopt
+import threading
 
 PATH = os.path.realpath(__file__).rstrip(os.path.basename(__file__))
 
@@ -13,7 +14,6 @@ DEVICE = "plughw:1"
 
 HELLO_MP3 = PATH + 'audio/hello.mp3'
 RECORDING_WAV = PATH + 'audio/recording.wav'
-RESPONSE_MP3 = PATH + 'audio/response.mp3'
 
 PUSH_BUTTON = 10
 
@@ -69,6 +69,19 @@ def thinking(lock):
     while lock.locked():
         rgbLed.blink(Color.yellow)
 
+lock = threading.Lock()
+def start_thinking():
+    lock.acquire()
+    thinking_thread = threading.Thread(target=thinking, args=(lock, ))
+    thinking_thread.start()
+
+def end_thinking(response_file):
+    lock.release()  # stop blinking
+    print("Alexa is Ready to Speak")
+    rgbLed.on(Color.yellow)
+    speak(response_file)
+    rgbLed.off()
+    rgbLed.on(Color.white)
 
 def listen():
     global RECORDING_WAV
@@ -102,9 +115,7 @@ def listen():
             rgbLed.off()
             print('Recording Stopped')
             recording = False
-            alexa(RECORDING_WAV)
-            rgbLed.on(Color.white)
-
+            alexa(RECORDING_WAV, start_thinking_callback=start_thinking, end_thinking_callback=end_thinking)
 
 if __name__ == "__main__":
     opts, args = getopt.getopt(sys.argv[1:], 't:i', ['type=', 'input='])
@@ -124,9 +135,9 @@ if __name__ == "__main__":
             if input_type is 'voice':
                 listen()
             elif input_type is 'audio_file':
-                alexa(input)
+                alexa(input, start_thinking_callback=start_thinking, end_thinking_callback=end_thinking)
             elif input_type is 'text':
-                alexa(ttw(input))
+                alexa(ttw(input), start_thinking_callback=start_thinking, end_thinking_callback=end_thinking)
         else:
             rgbLed.on(Color.red).on()
     finally:
