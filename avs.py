@@ -37,6 +37,7 @@ AVS_REQUEST_DATA = {
     }
 }
 
+
 def get_access_token():
     token = CACHE.get("access_token")
     global REFRESH_TOKEN
@@ -53,8 +54,10 @@ def get_access_token():
     else:
         return False
 
+
 def noop():
     pass
+
 
 def alexa(recording, start_thinking_callback=noop, end_thinking_callback=noop):
     global AVS_URL

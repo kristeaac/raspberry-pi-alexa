@@ -19,6 +19,7 @@ PUSH_BUTTON = 10
 
 rgbLed = RGBLed(33, 35, 37)
 
+
 def setup():
     print("Started GPIO Setup")
     GPIO.setwarnings(False)
@@ -31,10 +32,12 @@ def setup():
 def speak(utterance_file):
     os.system('mpg123 -q {}audio/1sec.mp3 {}'.format(PATH, utterance_file))
 
+
 def ttw(text):
     global RECORDING_WAV
     os.system('echo \"{}\" | text2wave -o {}'.format(text, RECORDING_WAV))
     return RECORDING_WAV
+
 
 def greeting():
     global HELLO_MP3
@@ -69,11 +72,15 @@ def thinking(lock):
     while lock.locked():
         rgbLed.blink(Color.yellow)
 
+
 lock = threading.Lock()
+
+
 def start_thinking():
     lock.acquire()
     thinking_thread = threading.Thread(target=thinking, args=(lock, ))
     thinking_thread.start()
+
 
 def end_thinking(response_file):
     lock.release()  # stop blinking
@@ -82,6 +89,7 @@ def end_thinking(response_file):
     speak(response_file)
     rgbLed.off()
     rgbLed.on(Color.white)
+
 
 def listen():
     global RECORDING_WAV
@@ -117,6 +125,7 @@ def listen():
             recording = False
             alexa(RECORDING_WAV, start_thinking_callback=start_thinking, end_thinking_callback=end_thinking)
 
+
 if __name__ == "__main__":
     opts, args = getopt.getopt(sys.argv[1:], 't:i:', ['type=', 'input='])
     input_type = 'voice'
@@ -125,8 +134,7 @@ if __name__ == "__main__":
             input_type = arg
         if opt in ("-i", "--input"):
             input = arg
-    print(input_type)
-    print(input)
+    print('input_type={}, input={}'.format(input_type, input))
     setup()
     try:
         if internet_on():
@@ -137,7 +145,6 @@ if __name__ == "__main__":
             if input_type == 'voice':
                 listen()
             elif input_type == 'audio_file':
-		print(input)
                 alexa(input, start_thinking_callback=start_thinking, end_thinking_callback=end_thinking)
             elif input_type == 'text':
                 alexa(ttw(input), start_thinking_callback=start_thinking, end_thinking_callback=end_thinking)
