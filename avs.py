@@ -73,6 +73,7 @@ def alexa(recording, start_thinking_callback=noop, end_thinking_callback=noop):
             ('file', ('audio', inf, 'audio/L16; rate=16000; channels=1'))
         ]
         response = requests.post(AVS_URL, headers=headers, files=files)
+    print(response.status_code)
     if response.status_code == 200:
         for v in response.headers['content-type'].split(";"):
             if re.match('.*boundary.*', v):

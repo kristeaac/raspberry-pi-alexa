@@ -118,13 +118,15 @@ def listen():
             alexa(RECORDING_WAV, start_thinking_callback=start_thinking, end_thinking_callback=end_thinking)
 
 if __name__ == "__main__":
-    opts, args = getopt.getopt(sys.argv[1:], 't:i', ['type=', 'input='])
+    opts, args = getopt.getopt(sys.argv[1:], 't:i:', ['type=', 'input='])
     input_type = 'voice'
     for opt, arg in opts:
         if opt in ("-t", "--type"):
             input_type = arg
         if opt in ("-i", "--input"):
             input = arg
+    print(input_type)
+    print(input)
     setup()
     try:
         if internet_on():
@@ -132,11 +134,12 @@ if __name__ == "__main__":
             greeting()
             rgbLed.off()
             get_access_token()
-            if input_type is 'voice':
+            if input_type == 'voice':
                 listen()
-            elif input_type is 'audio_file':
+            elif input_type == 'audio_file':
+		print(input)
                 alexa(input, start_thinking_callback=start_thinking, end_thinking_callback=end_thinking)
-            elif input_type is 'text':
+            elif input_type == 'text':
                 alexa(ttw(input), start_thinking_callback=start_thinking, end_thinking_callback=end_thinking)
         else:
             rgbLed.on(Color.red).on()
