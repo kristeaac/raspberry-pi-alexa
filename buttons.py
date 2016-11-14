@@ -37,6 +37,15 @@ def greeting():
     global HELLO_MP3
     speak(HELLO_MP3)
 
+def pressed():
+    return not GPIO.input(PUSH_BUTTON)
+
+def run():
+    while True:
+        if pressed():
+            rgbLed.blink(Color.yellow)
+        rgbLed.off()
+
 def cleanup():
     print("Started GPIO Cleanup")
     try:
@@ -53,7 +62,7 @@ if __name__ == "__main__":
             greeting()
             rgbLed.off()
             get_access_token()
-            # TODO
+            run()
         else:
             rgbLed.on(Color.red).on()
     finally:
