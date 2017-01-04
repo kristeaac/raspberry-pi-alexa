@@ -11,6 +11,10 @@ A [pushbutton](https://www.amazon.com/6x6x6mm-Momentary-Push-Button-Switch/dp/B0
 * __blinking yellow__ - posting Speech to Alexa and waiting for response
 * __solid yellow__ - playing response from Alexa
 
+#### Wiring
+* The __RGB LED__ is wired to pins 33, 35, and 37 on the Raspberry Pi in [buttons.py](buttons.py#L10) and [main.py](main.py#L20)
+* The __pushbutton__ is wired to pin 10 in [main.py](main.py#L18) and [buttons.py](buttons.py#L8)
+
 ### Software
 Follow [this tutorial](https://www.youtube.com/watch?v=frH9HaQTFL8) for a one-time install of the necessary dependencies for this project, and for obtaining the client credentials and refresh token needed to call AVS.
 
@@ -22,7 +26,7 @@ $ export ALEXA_CLIENT_ID="<YOUR_CLIENT_ID>"
 $ export ALEXA_CLIENT_SECRET="<YOUR_CLIENT_SECRET>"
 ```
 
-These environment variables are needed in [main.py](main.py#L11-L13) to obtain an AVS access token:
+These environment variables are needed in [avs.py](avs.py#L7-L9) to obtain an AVS access token:
 
 ```
 REFRESH_TOKEN = os.environ['ALEXA_REFRESH_TOKEN']
